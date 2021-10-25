@@ -6,6 +6,7 @@
 ##' @param debug Start by calling browser()?
 ##' @family Nonmem
 ##' @import nonmem2R
+##' @import data.table
 
 
 ## for inspiration, from Pirana design:
@@ -67,6 +68,13 @@ NMreadRun <- function(run,debug=F){
 
     out$problem <- problem
 
+    out$subroutine <- NMgetSection(runfile
+                                  ,section="SUBROUTINE"
+                                  ,keepName=F
+                                  ,keepEmpty=F
+                                  ,keepComments=F
+                                  ,cleanSpaces=T
+                                   )
 
     ## find reference as in ";; Reference modname"
     lines.lst <- readLines(runfile)
@@ -107,7 +115,7 @@ NMreadRun <- function(run,debug=F){
 
     ## NMgetSection2(file=file.models("BaseModel/run7162.lst"),section="ITERATION",char.section="0",type="res",debug=F)
 ### find last gradients
-    its=NMextractText(lines=lines.lst,section="ITERATION",char.section="0",type="res",debug=F)
+    its=NMextractText(lines=lines.lst,section="ITERATION",char.section="0",type="res")
     last.grad=its[max(grep("^ *GRADIENT",its))]
     last.grad <- sub("^ *GRADIENT: *","",last.grad)
     last.grad.n <- read.table(text=last.grad,header=F)[1,]
@@ -136,14 +144,13 @@ NMreadRun <- function(run,debug=F){
 
     
 
-    
     covinfo <- data.table(path.full.lst  = file.lst)
     covinfo[,fn.lst:=basename(path.full.lst)]
     ## covinfo[,path.full :=  file.models("BaseModel",fn.lst)]
     covinfo[,ROW := 1:.N]
     covinfo[,text.lst:= paste(readLines(path.full.lst),collapse="\n"),by = .(ROW)]
 
-    covinfo[,cov.request:= ifelse(is.null(NMgetSection(text = text.lst,section  =  "COV",keepName  = T,debug=F)),"No","Yes"),by = .(ROW)]
+    covinfo[,cov.request:= ifelse(is.null(NMgetSection(text = text.lst,section  =  "COV",keepName  = T)),"No","Yes"),by = .(ROW)]
 
     covinfo[,sec.cov:= paste(NMgetSection(text =  text.lst,section  =  "COV",keepName  =  T),collapse = "\n" ),by = .(ROW)]
 
@@ -173,6 +180,8 @@ NMreadRun <- function(run,debug=F){
     
     out$covsum <- covinfo[,.(covsum=paste(cov.request,cov.comment,sep=" - ")),by=.(ROW)]$covsum
     out$conv.OK <- out$minSuccessful&!out$roundingErrors&out$finalZeroGradient==0&out$covSuccessful
+
+    if(length(out$covRun)==0) out$covRun <- FALSE
     
     if(file.exists(file.ext)){
         n2r.ext <- extload(file.ext)

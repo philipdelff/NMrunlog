@@ -32,13 +32,18 @@ NMrunLog <- function(dir,runs,runs.omit,debug=F){
     runs.list <- lapply(runs,
                         function(run){
                             cat(run,"\n")
-                            reslist <- try(NMreadRun(run))
+                            reslist <- try(NMreadRun(paste0(run,".lst"),debug=F))
                             if("try-error"%in%class(reslist)) {
                                 warning("Could not read",run)
                                 return(NULL)
                             } else {
+## grad.max deleted. Why not available?
+                                els.to.get <- c("run","problem","Npars","OFV","run.ref","subroutine","covRun","finalZeroGradient","covSuccessful","conditionNumber","Nsubjs","Nobs","minSuccessful","roundingErrors","min.problem","near.bound","convsum","cov.request","cov.comment","covsum","conv.OK")
+                                    ## setdiff(els.to.get,names(reslist))
+
                                 as.data.frame(
-                                    reslist[c("run","problem","Npars","OFV","run.ref","covRun","finalZeroGradient","covSuccessful","conditionNumber","Nsubjs","Nobs","minSuccessful","roundingErrors","min.problem","near.bound","grad.max","convsum","cov.request","cov.comment","covsum","conv.OK")],
+                                    reslist[els.to.get]
+                                   ,
                                     stringsAsFactors=F
                                 )
                             }}

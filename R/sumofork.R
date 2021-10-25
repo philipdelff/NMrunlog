@@ -61,14 +61,14 @@ sumofork <- function (model, tableType = 2, format.estimate = "% -#6.4g",
     etaShrink <- NA
     epsShrink <- NA
     k <- suppressWarnings(grep("ETAshrink(", d0, fixed = TRUE))
-    if (length(k) > 0 & nchar(d0[k]) > 20) {
+    if (length(k) > 0 && nchar(d0[k]) > 20) {
         tmp0 <- substr(d0[k], 15, 300)
         tmp1 <- gsub("^\\s+|\\s+$", "", tmp0)
         tmp2 <- gsub(" +", " ", tmp1)
         etaShrink <- as.numeric(strsplit(tmp2, split = " ")[[1]])
     }
     k <- suppressWarnings(grep("EPSshrink(", d0, fixed = TRUE))
-    if (length(k) > 0 & nchar(d0[k]) > 20) {
+    if (length(k) > 0 && nchar(d0[k]) > 20) {
         tmp0 <- substr(d0[k], 15, 300)
         tmp1 <- gsub("^\\s+|\\s+$", "", tmp0)
         tmp2 <- gsub(" +", " ", tmp1)
